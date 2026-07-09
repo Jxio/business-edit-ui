@@ -318,7 +318,9 @@ export default class ViewWrapper extends Mixins(CommonMixin, FilingTemplateMixin
       if (this.isFirmConversionFiling) filing = this.buildConversionFiling(isDraft)
       if (this.isRestorationFiling) filing = this.buildRestorationFiling(isDraft)
       if (this.isSpecialResolutionFiling) filing = this.buildSpecialResolutionFiling(isDraft)
-
+      if (filing.header.certifiedBy === '') {
+        delete filing.header.certifiedBy
+      }
       // update the filing if we have a filingId, otherwise create a draft
       filingComplete = this.getFilingId
         ? await LegalServices.updateFiling(this.getBusinessId, this.getFilingId, filing, isDraft)
