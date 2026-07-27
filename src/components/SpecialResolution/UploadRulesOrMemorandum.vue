@@ -27,11 +27,16 @@
         ref="fileUploadRef"
         class="flex-grow-1"
         customErrorMSg="Rules document required"
-        :isRequired="true"
-        :pageSize="PageSizes.LETTER_PORTRAIT"
+        :businessIdentifier="getBusinessId"
+        :documentType="documentType"
+        :entityType="getEntityType"
         :file="file"
         :fileKey="fileKey"
+        :filingId="getFilingId"
+        :filingType="filingType"
+        :isRequired="true"
         :maxSize="30"
+        :pageSize="PageSizes.LETTER_PORTRAIT"
         :userId="userKeycloakGuid"
         @update:file="updateFile"
         @update:fileKey="updateDocumentKey"
@@ -45,9 +50,10 @@ import Vue from 'vue'
 import { Component, Prop } from 'vue-property-decorator'
 import { Getter } from 'pinia-class'
 import { FormIF, RulesMemorandumIF } from '@/interfaces'
-import { PageSizes } from '@/enums/'
+import { DocumentTypes, FilingTypes, PageSizes } from '@/enums/'
 import FileUploadPdf from '@/components/common/FileUploadPdf.vue'
 import { useStore } from '@/store/store'
+import { CorpTypeCd } from '@bcrs-shared-components/corp-type-module/'
 
 @Component({
   components: {
@@ -55,11 +61,21 @@ import { useStore } from '@/store/store'
   }
 })
 export default class UploadRulesOrMemorandum extends Vue {
+  @Getter(useStore) getBusinessId!: string
+  @Getter(useStore) getEntityType!: CorpTypeCd
+  @Getter(useStore) getFilingId!: number
   @Getter(useStore) getUserInfo!: any
+  @Getter(useStore) isCoopCorrectionFiling!: boolean
 
+  @Prop({ required: true }) readonly documentType: DocumentTypes
   @Prop({ default: false }) readonly invalidSection: boolean
 
   readonly PageSizes = PageSizes
+
+  /** The filing type this document upload belongs to. */
+  get filingType (): FilingTypes {
+    return this.isCoopCorrectionFiling ? FilingTypes.CORRECTION : FilingTypes.SPECIAL_RESOLUTION
+  }
 
   file: File = null
   fileKey: string = null

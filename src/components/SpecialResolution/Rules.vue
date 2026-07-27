@@ -165,6 +165,7 @@
                     <UploadRulesOrMemorandum
                       v-if="uploadDropdown || !hasResolutionSection"
                       ref="uploadRulesRef"
+                      :documentType="DocumentTypes.COOP_RULES"
                       :invalidSection="rulesEditingInvalid"
                     />
                     <!-- Confirmation -->
@@ -350,6 +351,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { HelpSection } from '@/components/common/'
+import { DocumentTypes } from '@/enums/'
 import { EntitySnapshotIF, RulesMemorandumIF } from '@/interfaces'
 import DateUtilities from '@/services/date-utilities'
 import { FormIF } from '@bcrs-shared-components/interfaces'
@@ -383,6 +385,9 @@ export default class Rules extends Vue {
       rulesForm: FormIF,
       uploadRulesRef: FormIF
     }
+
+    readonly DocumentTypes = DocumentTypes
+
     describeDropdown = false
     hasChanged = false
     isEditing = false

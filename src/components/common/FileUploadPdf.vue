@@ -18,16 +18,22 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Component, Emit, Prop } from 'vue-property-decorator'
-import { PageSizes, PAGE_SIZE_DICT } from '@/enums'
+import { DocumentTypes, FilingTypes, PageSizes, PAGE_SIZE_DICT } from '@/enums'
 import { PdfInfoIF } from '@/interfaces'
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf'
 import { LegalServices } from '@/services/'
+import { CorpTypeCd } from '@bcrs-shared-components/corp-type-module/'
 
 @Component({})
 export default class FileUploadPdf extends Vue {
+  @Prop({ default: null }) readonly businessIdentifier!: string
   @Prop({ default: null }) readonly customErrorMSg!: string
+  @Prop({ required: true }) readonly documentType!: DocumentTypes
+  @Prop({ required: true }) readonly entityType!: CorpTypeCd
   @Prop({ default: null }) readonly file!: File
   @Prop({ default: null }) readonly fileKey!: string
+  @Prop({ default: null }) readonly filingId!: number
+  @Prop({ required: true }) readonly filingType!: FilingTypes
   @Prop({ default: true }) readonly isRequired!: boolean
   @Prop({ default: 0 }) readonly maxSize!: number // in MB
   @Prop({ default: null }) readonly pageSize!: PageSizes
@@ -245,16 +251,9 @@ export default class FileUploadPdf extends Vue {
   async uploadFile (file: File): Promise<string> {
     try {
       // NB: will throw on API error
-      const psu = await LegalServices.getPresignedUrl(file.name)
-
-      // NB: will throw on API error
-      const res = await LegalServices.uploadToUrl(psu.preSignedUrl, file, psu.key, this.userId)
-
-      // check if successful
-      if (res?.status === 200) {
-        return psu.key
-      }
-      throw new Error()
+      const doc = await LegalServices.uploadDocument(file, this.filingType, this.entityType,
+        this.documentType, this.userId, this.businessIdentifier, this.filingId)
+      return doc.key
     } catch (err) {
       this.errorMessages = ['An error occurred while uploading. Please try again.']
       return null

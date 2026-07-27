@@ -128,6 +128,7 @@
                 <UploadRulesOrMemorandum
                   v-if="!hasResolutionSection"
                   ref="uploadMemorandumRef"
+                  :documentType="DocumentTypes.COOP_MEMORANDUM"
                 />
               </div>
               <v-row
@@ -269,6 +270,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { HelpSection } from '@/components/common/'
+import { DocumentTypes } from '@/enums/'
 import { EntitySnapshotIF, RulesMemorandumIF } from '@/interfaces'
 import DateUtilities from '@/services/date-utilities'
 import { FormIF } from '@bcrs-shared-components/interfaces'
@@ -301,6 +303,8 @@ export default class Memorandum extends Vue {
     memorandumForm: FormIF
     uploadMemorandumRef: FormIF
   }
+
+  readonly DocumentTypes = DocumentTypes
 
   hasChanged = false
   isEditing = false
