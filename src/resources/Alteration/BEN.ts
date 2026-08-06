@@ -40,7 +40,7 @@ export const AlterationResourceBen: ResourceIF = {
       }
     ],
     articleTitle: 'Benefit Company Articles',
-    articleInfo: `The company has completed a set Benefit Company Articles containing a benefit provision, 
+    articleInfo: `The company has completed a set of Benefit Company Articles containing a benefit provision,
       and a copy of these articles has been added to the company's record book.`
   },
   certifyClause: 'Note: It is an offence to make a false or misleading statement in respect ' +
