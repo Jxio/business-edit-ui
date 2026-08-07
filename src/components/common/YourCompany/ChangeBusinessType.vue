@@ -27,7 +27,7 @@
       >
         <span
           class="info-text"
-          :class="{ 'has-conflict': isConflictingLegalType && isNewName}"
+          :class="{ 'has-conflict': isConflictingLegalType && hasNewNr}"
         >
           {{ GetCorpFullDescription(getEntityType) }}
         </span>
@@ -53,7 +53,7 @@
 
         <!-- Type mismatch tooltip -->
         <v-tooltip
-          v-if="isConflictingLegalType && isNewName"
+          v-if="isConflictingLegalType && hasNewNr"
           top
           content-class="top-tooltip"
           transition="fade-transition"
@@ -404,14 +404,6 @@ export default class ChangeBusinessType extends Mixins(CommonMixin) {
   @Watch('isEntityTypeChangedByName')
   entityTypeChangedByName (val): void {
     this.isEditingType = val
-  }
-
-  /** Whether this is a new business name. */
-  get isNewName (): boolean {
-    return (
-      this.getNameRequestLegalName &&
-      this.getNameRequestLegalName !== this.getOriginalLegalName
-    )
   }
 
   /** The type change information. */

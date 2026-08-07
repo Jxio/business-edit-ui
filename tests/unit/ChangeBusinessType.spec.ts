@@ -246,4 +246,59 @@ describe('Change Business Type component', () => {
 
     expect(wrapper.find('#minimum-three-director-error').exists()).toBe(false)
   })
+
+  it('should NOT show conflict tooltip when name is changed to numbered during a type change', async () => {
+    store.stateModel.tombstone.filingType = FilingTypes.ALTERATION
+    store.stateModel.entitySnapshot = {
+      businessInfo: {
+        legalType: CorpTypeCd.BENEFIT_COMPANY,
+        legalName: 'HELLO BENEFIT COMPANY LTD.'
+      }
+    } as EntitySnapshotIF
+
+    // simulate: type changed to BC, name changed to numbered (no NR)
+    store.stateModel.tombstone.entityType = CorpTypeCd.BC_COMPANY
+    store.stateModel.nameRequest = { legalType: CorpTypeCd.BENEFIT_COMPANY, nrNum: undefined } as any
+    store.stateModel.nameRequestLegalName = '3000152 B.C. LTD.'
+
+    const wrapper: any = mount(ChangeBusinessType, { vuetify })
+    wrapper.vm.selectedEntityType = CorpTypeCd.BC_COMPANY
+    await Vue.nextTick()
+
+    wrapper.vm.isEditingType = false
+    await Vue.nextTick()
+
+    expect(wrapper.vm.hasNewNr).toBe(false)
+    expect(wrapper.find('.v-tooltip').exists()).toBe(false)
+
+    wrapper.destroy()
+  })
+
+  it('should still show conflict tooltip for a real NR name/type mismatch', async () => {
+    store.stateModel.tombstone.filingType = FilingTypes.ALTERATION
+    store.stateModel.entitySnapshot = {
+      businessInfo: {
+        legalType: CorpTypeCd.BENEFIT_COMPANY,
+        legalName: 'HELLO BENEFIT COMPANY LTD.'
+      }
+    } as EntitySnapshotIF
+
+    // simulate: real NR entered with a legal type that conflicts with the selected type
+    store.stateModel.tombstone.entityType = CorpTypeCd.BC_COMPANY
+    store.stateModel.nameRequest = { legalType: CorpTypeCd.BENEFIT_COMPANY, nrNum: 'NR 1234567' } as any
+    store.stateModel.nameRequestLegalName = 'NEW NAME LTD.'
+
+    const wrapper: any = mount(ChangeBusinessType, { vuetify })
+    wrapper.vm.selectedEntityType = CorpTypeCd.BC_COMPANY
+    await Vue.nextTick()
+
+    wrapper.vm.isEditingType = false
+    await Vue.nextTick()
+
+    expect(wrapper.vm.isConflictingLegalType).toBe(true)
+    expect(wrapper.vm.hasNewNr).toBe(true)
+    expect(wrapper.find('.v-tooltip').exists()).toBe(true)
+
+    wrapper.destroy()
+  })
 })
