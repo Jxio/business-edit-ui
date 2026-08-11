@@ -774,11 +774,13 @@ export default class OrgPerson extends Mixins(CommonMixin, OrgPersonMixin) {
     if (this.$refs.orgPersonForm) {
       this.$refs.orgPersonForm.validate()
     }
+    // NB: use validate()'s return value — base-address 2.2.9+ doesn't emit "valid"
+    // for an untouched valid address, so the flags may still hold their initial false
     if (this.$refs.mailingAddress?.$refs.addressForm) {
-      await this.$refs.mailingAddress.validate()
+      this.mailingAddressValid = await this.$refs.mailingAddress.validate()
     }
     if (this.$refs.deliveryAddress?.$refs.addressForm) {
-      await this.$refs.deliveryAddress.validate()
+      this.deliveryAddressValid = await this.$refs.deliveryAddress.validate()
     }
 
     // verify the main form + mailing address (all roles)
