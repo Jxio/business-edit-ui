@@ -1,6 +1,5 @@
 import sinon from 'sinon'
 import { AxiosInstance as axios } from '@/utils/'
-import * as FeatureFlags from '@/utils/feature-flag-utils'
 import LegalServices from '@/services/legal-services'
 import { DocumentIF } from '@/interfaces'
 import { DocumentTypes, FilingTypes } from '@/enums'
@@ -295,9 +294,7 @@ describe('Legal Services', () => {
     expect(documentResponse).toEqual({ 'data': '1234' })
   })
 
-  it('uploads a document to DRS when the drs-upload feature is enabled', async () => {
-    vi.spyOn(FeatureFlags, 'GetFeatureFlag').mockReturnValue('enable-legal-name-fix,drs-upload')
-
+  it('uploads a document to DRS', async () => {
     // mock DRS upload response
     post.withArgs('https://business-api.url/documents/client/specialResolution/CP/coop_rules')
       .returns(Promise.resolve({
@@ -323,50 +320,8 @@ describe('Legal Services', () => {
   })
 
   it('throws when the DRS document upload fails', async () => {
-    vi.spyOn(FeatureFlags, 'GetFeatureFlag').mockReturnValue('enable-legal-name-fix,drs-upload')
-
     // mock DRS upload error
     post.returns(Promise.reject(new Error('went wrong')))
-
-    const file = new File(['data'], 'rules.pdf', { type: 'application/pdf' })
-    await expect(
-      LegalServices.uploadDocument(file, FilingTypes.SPECIAL_RESOLUTION, CorpTypeCd.COOP,
-        DocumentTypes.COOP_RULES, 'keycloak-guid', 'CP1002605', 111)
-    ).rejects.toThrow()
-  })
-
-  it('uploads a document via Minio when the drs-upload feature is disabled', async () => {
-    vi.spyOn(FeatureFlags, 'GetFeatureFlag').mockReturnValue('enable-legal-name-fix')
-
-    // mock presigned url + Minio upload responses
-    get.withArgs('https://business-api.url/documents/rules.pdf/signatures')
-      .returns(Promise.resolve({
-        data: {
-          preSignedUrl: 'https://minio.url/rules.pdf',
-          key: 'minio-key-123'
-        }
-      }))
-    put.withArgs('https://minio.url/rules.pdf').returns(Promise.resolve({ status: 200 }))
-
-    const file = new File(['data'], 'rules.pdf', { type: 'application/pdf' })
-    const doc = await LegalServices.uploadDocument(file, FilingTypes.SPECIAL_RESOLUTION, CorpTypeCd.COOP,
-      DocumentTypes.COOP_RULES, 'keycloak-guid', 'CP1002605', 111)
-
-    expect(doc.key).toBe('minio-key-123')
-  })
-
-  it('throws when the Minio document upload fails', async () => {
-    vi.spyOn(FeatureFlags, 'GetFeatureFlag').mockReturnValue('')
-
-    // mock presigned url response + Minio upload error
-    get.withArgs('https://business-api.url/documents/rules.pdf/signatures')
-      .returns(Promise.resolve({
-        data: {
-          preSignedUrl: 'https://minio.url/rules.pdf',
-          key: 'minio-key-123'
-        }
-      }))
-    put.returns(Promise.reject(new Error('went wrong')))
 
     const file = new File(['data'], 'rules.pdf', { type: 'application/pdf' })
     await expect(
